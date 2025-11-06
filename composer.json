@@ -1,6 +1,6 @@
 {
     "name": "ronald-ph/laravel-blockchain",
-    "description": "A Laravel package for implementing blockchain ledger functionality with digital signatures",
+    "description": "A Laravel package for implementing blockchain ledger functionality with digital signatures.",
     "type": "library",
     "keywords": [
         "laravel",
@@ -45,7 +45,7 @@
             }
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "version": "1.0.0"
 }
