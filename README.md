@@ -1,19 +1,32 @@
-# Laravel Blockchain
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ronald-ph/laravel-blockchain/main/laravel-blockchain.png" alt="Laravel Blockchain Banner" width="100%" />
+</p>
 
-A Laravel package for implementing blockchain ledger functionality with digital signatures for data integrity and audit trails.
+# ⚡ Laravel Blockchain
 
-## Features
+> A Laravel package for implementing **blockchain ledger functionality** with **digital signatures** to ensure data integrity and provide an immutable **audit trail**.
 
-- ✅ Create immutable blockchain records for any model
-- ✅ Digital signature verification using RSA keys
-- ✅ Chain integrity verification
-- ✅ Data tampering detection
-- ✅ Complete audit trail history
-- ✅ Artisan commands for key generation and verification
-- ✅ Configurable hash algorithms
-- ✅ Support for custom cryptographic keys
+![Packagist Version](https://img.shields.io/packagist/v/ronald-ph/laravel-blockchain?color=ff2d20&logo=laravel)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![PHP](https://img.shields.io/badge/PHP-%5E8.1-blue?logo=php)
+![Laravel](https://img.shields.io/badge/Laravel-%5E10.0-ff2d20?logo=laravel)
+![Build](https://img.shields.io/github/actions/workflow/status/ronald-ph/laravel-blockchain/tests.yml?label=tests)
 
-## Installation
+---
+
+## 🚀 Features
+
+- ✅ Immutable blockchain records for any model  
+- ✅ RSA-based **digital signature verification**  
+- ✅ Chain integrity and data tamper detection  
+- ✅ Full audit trail of data changes  
+- ✅ Artisan commands for key generation and chain verification  
+- ✅ Configurable **hash algorithms** (SHA-256, SHA-512, etc.)  
+- ✅ Support for **custom cryptographic keys**
+
+---
+
+## 📦 Installation
 
 Install the package via Composer:
 
