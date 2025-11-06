@@ -9,8 +9,7 @@
 ![Packagist Version](https://img.shields.io/packagist/v/ronald-ph/laravel-blockchain?color=ff2d20&logo=laravel)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-%5E8.1-blue?logo=php)
-![Laravel](https://img.shields.io/badge/Laravel-%5E10.0-ff2d20?logo=laravel)
-![Build](https://img.shields.io/github/actions/workflow/status/ronald-ph/laravel-blockchain/tests.yml?label=tests)
+![Laravel](https://img.shields.io/badge/Laravel-%5E9.0-ff2d20?logo=laravel)
 
 ---
 
