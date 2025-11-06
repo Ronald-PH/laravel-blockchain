@@ -1,0 +1,51 @@
+{
+    "name": "ronald-ph/laravel-blockchain",
+    "description": "A Laravel package for implementing blockchain ledger functionality with digital signatures",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "blockchain",
+        "ledger",
+        "digital-signature",
+        "audit-trail"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ronald PH",
+            "email": "ronsoberano02@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0|^11.0",
+        "illuminate/database": "^10.0|^11.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0",
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RonaldPH\\LaravelBlockchain\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RonaldPH\\LaravelBlockchain\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RonaldPH\\LaravelBlockchain\\BlockchainServiceProvider"
+            ],
+            "aliases": {
+                "Blockchain": "RonaldPH\\LaravelBlockchain\\Facades\\Blockchain"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "version": "1.0.0"
+}

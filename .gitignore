@@ -1,0 +1,10 @@
+/vendor
+/node_modules
+composer.lock
+.phpunit.result.cache
+.php_cs.cache
+.DS_Store
+Thumbs.db
+*.pem
+*.key
+/storage/blockchain/keys/*
