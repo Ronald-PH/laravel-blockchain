@@ -46,7 +46,7 @@ php artisan vendor:publish --tag=blockchain-migrations
 php artisan migrate
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 The configuration file is located at `config/blockchain.php`. Key settings include:
 
@@ -63,7 +63,7 @@ return [
 ];
 ```
 
-## Generate Keys
+## 🔑 Generate Keys
 
 Generate RSA key pair for signing blockchain blocks:
 
@@ -83,7 +83,7 @@ BLOCKCHAIN_PRIVATE_KEY_PASSWORD=yourpassword
 
 ## Usage
 
-### Basic Usage
+### 🧩 Basic Usage
 
 ```php
 use RonaldPH\LaravelBlockchain\Facades\Blockchain;
@@ -102,7 +102,7 @@ $block = Blockchain::createBlock(
 );
 ```
 
-### Using with Request (File Upload)
+### 📤 Using with Request (File Upload)
 
 ```php
 use Illuminate\Http\Request;
@@ -136,7 +136,7 @@ public function store(Request $request)
 }
 ```
 
-### Update Records
+### 🔄 Update & Chain Blocks
 
 ```php
 // Update user
@@ -149,7 +149,7 @@ $block = Blockchain::createBlock(
     $user->only('id', 'email', 'updated_at')
 );
 ```
-
+## 🔍 Verification
 ### Verify a Block
 
 ```php
@@ -204,7 +204,7 @@ foreach ($history as $block) {
 }
 ```
 
-### Using Custom Keys
+### 🔐 Using Custom Keys
 
 ```php
 // Set custom private and public keys
@@ -217,7 +217,7 @@ $result = Blockchain::setPublicKey('/path/to/public.pem')
     ->verifyBlock($blockHash);
 ```
 
-## Artisan Commands
+## 🧰 Artisan Commands
 
 ### Verify Chain
 
@@ -231,9 +231,9 @@ Output:
 Total blocks verified: 5
 ```
 
-## Advanced Usage
+## 🧠 Advanced Usage
 
-### Model Trait (Optional)
+### 🔸 Model Trait (Optional)
 
 Create a trait to easily add blockchain to your models:
 
@@ -281,7 +281,7 @@ $history = $user->getBlockchainHistory();
 $result = $user->verifyBlockchain();
 ```
 
-### Model Events (Auto-create blocks)
+### 🔸 Model Events (Auto-create blocks)
 
 ```php
 class User extends Model
@@ -309,7 +309,7 @@ class User extends Model
 }
 ```
 
-## API Example
+## 🌐 API Endpoints Example
 
 ```php
 Route::prefix('blockchain')->group(function () {
@@ -320,7 +320,7 @@ Route::prefix('blockchain')->group(function () {
 });
 ```
 
-## How It Works
+## ⚙️ How It Works
 
 1. **Block Creation**: When you create a block, the package:
    - Hashes your data using SHA-256
@@ -341,27 +341,27 @@ Route::prefix('blockchain')->group(function () {
    - Cryptographic proof of authenticity
    - Tamper-evident history
 
-## Security Considerations
+## 🛡️ Security Recommendations
 
-- **Store keys securely**: Never commit private keys to version control
-- **Use strong passwords**: Protect your private key with a strong password
-- **Restrict key access**: Limit who can access private keys
-- **Regular backups**: Backup your keys and blockchain data
-- **Key rotation**: Consider rotating keys periodically
+- 🔐 Never commit private keys to version control
+- 🧱 Store keys in **storage/** with correct permissions
+- 💪 Use strong passwords and rotate keys periodically
+- 💾 Regularly back up both keys and ledger data
 
-## Testing
+## 🧪 Testing
 
 ```bash
 composer test
 ```
 
-## License
+## 📜 License
 
-MIT License
+This package is open-sourced software licensed under the [MIT License](https://github.com/Ronald-PH/laravel-blockchain/?tab=MIT-1-ov-file)
 
-## Credits
+## 💡 Credits
 
-- Ronald PH
+Developed by **Ronald PH**<br>
+📦 [GitHub Repository](https://github.com/ronald-ph/laravel-blockchain)
 
 ## Support
 
