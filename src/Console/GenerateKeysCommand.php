@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\File;
 
 class GenerateKeysCommand extends Command
 {
-    protected $signature = 'blockchain:generate-keys 
+    protected $signature = 'blockchain:generate-keys
                             {--password= : Password to encrypt the private key}
                             {--bits=2048 : Key size in bits (2048 or 4096)}';
-    
+
     protected $description = 'Generate RSA key pair for blockchain signing';
 
     public function handle()
@@ -41,7 +41,7 @@ class GenerateKeysCommand extends Command
         ];
 
         $res = openssl_pkey_new($config);
-        
+
         if (!$res) {
             $this->error('Failed to generate key pair: ' . openssl_error_string());
             return 1;

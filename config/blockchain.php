@@ -1,23 +1,25 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
-    | Blockchain Table Name
+    | Blockchain Ledger Table
     |--------------------------------------------------------------------------
     |
-    | The name of the table that will store blockchain ledger records.
+    | The table that stores blockchain ledger entries.
+    | You can override this in .env via BLOCKCHAIN_TABLE_NAME.
     |
     */
     'table_name' => env('BLOCKCHAIN_TABLE_NAME', 'blockchain_ledgers'),
 
     /*
     |--------------------------------------------------------------------------
-    | Hash Algorithm
+    | Hashing Algorithm
     |--------------------------------------------------------------------------
     |
-    | The hashing algorithm to use for block hashing.
-    | Supported: 'sha256', 'sha512', 'md5' (not recommended)
+    | The algorithm used to generate block hashes.
+    | Supported: 'sha256', 'sha512', 'md5' (md5 not recommended).
     |
     */
     'hash_algorithm' => env('BLOCKCHAIN_HASH_ALGORITHM', 'sha256'),
@@ -27,18 +29,18 @@ return [
     | Signature Algorithm
     |--------------------------------------------------------------------------
     |
-    | The OpenSSL signature algorithm to use.
-    | Supported: OPENSSL_ALGO_SHA256, OPENSSL_ALGO_SHA512
+    | OpenSSL algorithm used for signing blockchain data.
+    | Options: OPENSSL_ALGO_SHA256, OPENSSL_ALGO_SHA512.
     |
     */
     'signature_algorithm' => OPENSSL_ALGO_SHA256,
 
     /*
     |--------------------------------------------------------------------------
-    | Keys Storage Path
+    | Keys Storage Directory
     |--------------------------------------------------------------------------
     |
-    | The path where cryptographic keys are stored.
+    | The default location for blockchain keys (private/public).
     |
     */
     'keys_path' => storage_path('blockchain/keys'),
@@ -48,27 +50,30 @@ return [
     | Default Private Key
     |--------------------------------------------------------------------------
     |
-    | Path to the default private key file (relative to keys_path).
+    | File name of the default private key relative to keys_path.
+    | Used if no user certificate is assigned.
     |
     */
-    'private_key' => env('BLOCKCHAIN_PRIVATE_KEY', 'private.pem'),
+    'private_key' => env('BLOCKCHAIN_PRIVATE_KEY', 'private4.pem'),
 
     /*
     |--------------------------------------------------------------------------
     | Default Public Key
     |--------------------------------------------------------------------------
     |
-    | Path to the default public key file (relative to keys_path).
+    | File name of the default public key relative to keys_path.
+    | Used to verify blockchain data without user certificate.
     |
     */
-    'public_key' => env('BLOCKCHAIN_PUBLIC_KEY', 'public.pem'),
+    'public_key' => env('BLOCKCHAIN_PUBLIC_KEY', 'public4.pem'),
 
     /*
     |--------------------------------------------------------------------------
     | Private Key Password
     |--------------------------------------------------------------------------
     |
-    | Password for the private key encryption.
+    | Password for the default private key if encrypted.
+    | Can be set in .env as BLOCKCHAIN_PRIVATE_KEY_PASSWORD.
     |
     */
     'private_key_password' => env('BLOCKCHAIN_PRIVATE_KEY_PASSWORD', null),
@@ -78,18 +83,43 @@ return [
     | Genesis Block Hash
     |--------------------------------------------------------------------------
     |
-    | The hash used for the genesis block (first block in chain).
+    | Initial block hash for the blockchain.
     |
     */
     'genesis_hash' => '00000',
 
     /*
     |--------------------------------------------------------------------------
-    | Auto Verify Chain
+    | Save Algorithm Metadata
     |--------------------------------------------------------------------------
     |
-    | Automatically verify the blockchain integrity before creating new blocks.
+    | Whether each block stores its hashing algorithm.
+    | Useful if you might change system default in the future.
     |
     */
-    'auto_verify' => env('BLOCKCHAIN_AUTO_VERIFY', false),
+    'save_algorithm' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automatic Chain Verification
+    |--------------------------------------------------------------------------
+    |
+    | If true, verifies the chain integrity before adding a new block.
+    |
+    */
+    'auto_verify' => env('BLOCKCHAIN_AUTO_VERIFY', true),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Blockchain Root Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Enable Merkle root signing with a master key pair.
+    |
+    */
+    'with_blockchain_root' => env('WITH_BLOCKCHAIN_ROOT', false),
+    'master_private_key' => env('MASTER_PRIVATE_KEY', null),
+    'master_private_key_password' => env('MASTER_PRIVATE_KEY_PASSWORD', null),
+    'master_public_key' => env('MASTER_PUBLIC_KEY', null),
+
 ];

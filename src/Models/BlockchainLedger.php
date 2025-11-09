@@ -7,59 +7,52 @@ use Illuminate\Database\Eloquent\Model;
 class BlockchainLedger extends Model
 {
     protected $fillable = [
+        'nonce',
+        'user_id',
         'table_name',
         'record_id',
+        'data',
         'data_hash',
         'previous_hash',
         'block_hash',
         'signature',
+        'with_user_certificate',
+        'certificate_id',
+        'default_certificate_id',
+        'algorithm',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'with_user_certificate' => 'boolean',
     ];
 
-    /**
-     * Get the table name from config
-     */
     public function getTable()
     {
         return config('blockchain.table_name', 'blockchain_ledgers');
     }
 
-    /**
-     * Get the previous block in the chain
-     */
     public function previousBlock()
     {
-        return $this->hasOne(BlockchainLedger::class, 'block_hash', 'previous_hash')
+        return $this->hasOne(self::class, 'block_hash', 'previous_hash')
             ->where('table_name', $this->table_name)
             ->where('record_id', $this->record_id);
     }
 
-    /**
-     * Get the next block in the chain
-     */
     public function nextBlock()
     {
-        return $this->hasOne(BlockchainLedger::class, 'previous_hash', 'block_hash')
+        return $this->hasOne(self::class, 'previous_hash', 'block_hash')
             ->where('table_name', $this->table_name)
             ->where('record_id', $this->record_id);
     }
 
-    /**
-     * Scope to get blocks for a specific table and record
-     */
     public function scopeForRecord($query, string $tableName, int $recordId)
     {
         return $query->where('table_name', $tableName)
             ->where('record_id', $recordId);
     }
 
-    /**
-     * Get all blocks in chronological order for this record
-     */
     public function getChain()
     {
         return static::where('table_name', $this->table_name)
@@ -68,12 +61,15 @@ class BlockchainLedger extends Model
             ->get();
     }
 
-    /**
-     * Check if this is a genesis block
-     */
     public function isGenesisBlock(): bool
     {
-        $genesisHash = config('blockchain.genesis_hash', '00000');
-        return $this->previous_hash === $genesisHash;
+        return $this->previous_hash === config('blockchain.genesis_hash', '00000');
+    }
+
+    public function userCertificate() {
+        return $this->hasOne(ModelHasCertificate::class, 'id', 'certificate_id');
+    }
+    public function defaultCertificate() {
+        return $this->hasOne(BlockchainDefaultCertificate::class, 'id', 'default_certificate_id');
     }
 }
