@@ -89,7 +89,7 @@ class BlockchainManager
         }
 
         if ($block->with_user_certificate == 1) {
-            $publicKeyPath = $block->userCertificate->certificate_path;
+            $publicKeyPath = $block->userCertificate->public_key_path;
         } elseif ($block->with_user_certificate == 0) {
             $publicKeyPath = $block->defaultCertificate->public_key_path;
         } else {
@@ -252,8 +252,8 @@ class BlockchainManager
 
         if ($block->with_user_certificate == 1) {
             $certificate = ModelHasCertificate::where('id', $block->certificate_id)->first();
-            if ($certificate && file_exists(storage_path($certificate->certificate_path)) && $block->with_user_certificate == 1) {
-                $publicKeyPath = storage_path($certificate->certificate_path);
+            if ($certificate && file_exists(storage_path($certificate->public_key_path)) && $block->with_user_certificate == 1) {
+                $publicKeyPath = storage_path($certificate->public_key_path);
             }
         }
 

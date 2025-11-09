@@ -10,7 +10,8 @@ class ModelHasCertificate extends Model
 
     protected $fillable = [
         'user_id',
-        'certificate_path',
+        'private_key_path',
+        'public_key_path',
         'status',
     ];
 }
