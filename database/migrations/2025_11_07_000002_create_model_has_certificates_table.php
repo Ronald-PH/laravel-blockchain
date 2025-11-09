@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('model_has_certificates', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->index();
-            $table->string('private_key_path'); // example: storage/app/certificates/private.pem
-            $table->string('public_key_path'); // example: storage/app/certificates/public.pem
+            $table->string('private_key_path')->nullable(); // example: app/certificates/private.pem
+            $table->string('public_key_path')->nullable(); // example: app/certificates/public.pem
             $table->integer('status')->max(2)->default(1);
             $table->timestamps();
 
