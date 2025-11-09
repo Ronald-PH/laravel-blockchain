@@ -11,43 +11,7 @@
 ![PHP](https://img.shields.io/badge/PHP-%5E8.1-blue?logo=php)
 ![Laravel](https://img.shields.io/badge/Laravel-%5E9.0-ff2d20?logo=laravel)
 
----
-## ⚡ Upgrade Guide: v1.2.1 → v2.0.0
-> is release introduces user-specific certificates, health checks, and enhanced chain verification.
 
-## 1️⃣ Update Package
-```bash
-composer update ronald-ph/laravel-blockchain
-```
-
-## 2️⃣ Publish Updated Config & Migrations
-```bash
-php artisan vendor:publish --tag=blockchain-config
-php artisan vendor:publish --tag=blockchain-migrations
-php artisan migrate
-```
-
-## 3️⃣ Generate or Migrate Keys
-```bash
-php artisan blockchain:generate-keys --password=yourpassword
-```
-
-### Set in .env:
-```env
-BLOCKCHAIN_PRIVATE_KEY_PASSWORD=yourpassword
-```
-
-## 4️⃣ User Certificates (Optional)
-```php
-$block = Blockchain::createBlock(
-    'users',
-    $user->id,
-    $user->only('id', 'name', 'email'),
-    $user->id,
-    request()->file('certificate')
-);
-```
-v2.0.0 supports **user-specific PEM certificates**.
 ## 🚀 Features
 
 - ✅ **Immutable blockchain records** for any Eloquent model
@@ -102,6 +66,26 @@ Set the private key password in your `.env` file:
 BLOCKCHAIN_PRIVATE_KEY_PASSWORD=yourpassword
 ```
 
+### ⚡ Upgrade from v1.2.1 to v2.0.0
+
+This release introduces user-specific certificates, health checks, and enhanced chain verification.
+
+Update the package:
+
+```bash
+composer update ronald-ph/laravel-blockchain
+```
+
+Republish config and migrations if needed:
+
+```bash
+php artisan vendor:publish --tag=blockchain-config --force
+php artisan vendor:publish --tag=blockchain-migrations --force
+php artisan migrate
+```
+
+Regenerate keys if necessary and set the password in `.env`.
+
 ## ⚙️ Configuration
 
 The configuration file is located at `config/blockchain.php`. Key settings include:
@@ -123,22 +107,11 @@ return [
 ];
 ```
 
-## 🔑 Generate Keys
-
-Generate RSA key pair for signing blockchain blocks:
+To enable Merkle root verification, set `'with_blockchain_root' => true` and generate master keys:
 
 ```bash
-# Generate 2048-bit keys with password
-php artisan blockchain:generate-keys --password=yourpassword
-
-# Generate 4096-bit keys
-php artisan blockchain:generate-keys --bits=4096
-```
-
-Don't forget to set your password in `.env`:
-
-```env
-BLOCKCHAIN_PRIVATE_KEY_PASSWORD=yourpassword
+openssl genrsa -out master_private.pem 4096
+openssl rsa -in master_private.pem -pubout -out master_public.pem
 ```
 
 ## Usage
@@ -150,8 +123,8 @@ use RonaldPH\LaravelBlockchain\Facades\Blockchain;
 
 // Create a user
 $user = User::create([
-    'name' => 'John Doe',
-    'email' => 'john@example.com',
+    'name' => 'Juan Dela Cruz',
+    'email' => 'juan@example.com',
 ]);
 
 // Create blockchain record
@@ -172,27 +145,25 @@ public function store(Request $request)
 {
     $request->validate([
         'email' => 'required|email',
-        'private_key' => 'required|file', // Optional for user-specific certificates
-        'private_key_password' => 'required|string',
+        'private_key' => 'file', // Optional for user-specific certificates
+        'private_key_password' => 'string', // Optional for user-specific certificates
     ]);
 
     $user = User::create([
         'email' => $request->email,
     ]);
 
-    // Create block with uploaded private key (user-specific certificate)
+    // Create block with optional user-specific private key
     $block = Blockchain::createBlock(
         'users',
         $user->id,
         json_encode($user->only('id', 'email', 'created_at')),
-        $request->file('private_key'), // Optional: null for default certificate
-        $request->private_key_password
+        Auth::user()->id, // Optional: user ID
+        $request->file('private_key'), // Optional: user-specific key
+        $request->private_key_password // Optional: password
     );
 
-    return response()->json([
-        'user' => $user,
-        'block' => $block,
-    ]);
+    return response()->json(['user' => $user, 'block' => $block]);
 }
 ```
 
@@ -200,7 +171,7 @@ public function store(Request $request)
 
 ```php
 // Update user
-$user->update(['email' => 'newemail@example.com']);
+$user->update(['email' => 'juan@example.com']);
 
 // Create new blockchain block for the update
 $block = Blockchain::createBlock(
@@ -244,7 +215,7 @@ $user = User::find($userId);
 
 $result = Blockchain::verifyData(
     'users',
-    $userId,
+    $user->id,
     $user->only('id', 'email', 'updated_at')
 );
 
@@ -277,26 +248,6 @@ $block = Blockchain::setPrivateKey('/path/to/private.pem', 'password')
 // Verify with custom public key
 $result = Blockchain::setPublicKey('/path/to/public.pem')
     ->verifyBlock($blockHash);
-```
-
-### 🔸 User-Specific Certificates
-
-```php
-// Create block with user-specific certificate
-$block = Blockchain::createBlock(
-    'users',
-    $userId,
-    $data,
-    $userId, // User ID for certificate lookup
-    null // No file upload, uses stored certificate
-);
-
-// Update a user's certificate
-Blockchain::updateModelCertificate(
-    $userId,
-    file_get_contents('/path/to/private.pem'),
-    file_get_contents('/path/to/public.pem')
-);
 ```
 
 ## 🧰 Artisan Commands
@@ -499,39 +450,6 @@ $certificate = Blockchain::updateModelCertificate(
 
 // Retrieve a user's certificate
 $userCertificate = Blockchain::getModelCertificate($userId);
-```
-
-### 🔸 Merkle Root Verification
-
-Enable Merkle root verification in your config:
-
-```php
-'with_blockchain_root' => true,
-'master_private_key' => 'master_private.pem',
-'master_public_key' => 'master_public.pem',
-'master_private_key_password' => env('BLOCKCHAIN_MASTER_PRIVATE_KEY_PASSWORD'),
-```
-
-Generate master keys for Merkle root signing:
-
-```bash
-# Generate master keys (separate from regular keys)
-openssl genrsa -out master_private.pem 4096
-openssl rsa -in master_private.pem -pubout -out master_public.pem
-```
-
-## 🌐 API Endpoints Example
-
-```php
-Route::prefix('blockchain')->group(function () {
-    Route::post('/users', [UserController::class, 'store']);
-    Route::post('/verify/block/{hash}', [BlockchainController::class, 'verifyBlock']);
-    Route::get('/verify/chain/{table}/{id}', [BlockchainController::class, 'verifyChain']);
-    Route::get('/history/{table}/{id}', [BlockchainController::class, 'getHistory']);
-    Route::get('/health', function () {
-        return Artisan::call('blockchain:health --json');
-    });
-});
 ```
 
 ## ⚙️ How It Works
