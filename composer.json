@@ -1,6 +1,6 @@
 {
     "name": "ronald-ph/laravel-blockchain",
-    "description": "A Laravel package for implementing blockchain ledger functionality with digital signatures.",
+    "description": "A Laravel package to secure your app's data with immutable blockchain records, cryptographic signatures, audit trails, and tamper detection.",
     "type": "library",
     "keywords": [
         "laravel-package",
