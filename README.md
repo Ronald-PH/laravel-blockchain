@@ -1,6 +1,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/ronald-ph/laravel-blockchain/main/laravel-blockchain.png" alt="Laravel Blockchain Banner" width="100%" />
 </p>
+Secure your Laravel app's data with Laravel Blockchain. Create immutable, cryptographically signed records, maintain a complete audit trail, and detect tampering automatically.
 
 # Laravel Blockchain – Give Your Database a Tamper-Proof Memory
 
