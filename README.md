@@ -2,213 +2,141 @@
   <img src="https://raw.githubusercontent.com/ronald-ph/laravel-blockchain/main/laravel-blockchain.png" alt="Laravel Blockchain Banner" width="100%" />
 </p>
 
-# ⚡ Laravel Blockchain
-
-> A comprehensive Laravel package for implementing **blockchain ledger functionality** with **RSA-based digital signatures**, **Merkle root verification**, and **user-specific certificates** to ensure data integrity, provide an immutable **audit trail**, and enable advanced security features like fork detection and health monitoring.
+# Laravel Blockchain – Give Your Database a Tamper-Proof Memory
 
 ![Packagist Version](https://img.shields.io/packagist/v/ronald-ph/laravel-blockchain?color=ff2d20&logo=laravel)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-%5E8.1-blue?logo=php)
 ![Laravel](https://img.shields.io/badge/Laravel-%5E9.0-ff2d20?logo=laravel)
 
+> Ever wondered if someone's been messing with your database records? This package brings blockchain-style immutability to your Laravel app, so you'll always know if your data has been tampered with. Think of it as a tamper-evident seal for your most important records.
 
-## 🚀 Features
+## Why You Might Want This
 
-- ✅ **Immutable blockchain records** for any Eloquent model
-- ✅ **RSA-based digital signature verification** for cryptographic security
-- ✅ **Chain integrity checks** and data tamper detection
-- ✅ **Full audit trail** of all data changes with timestamps
-- ✅ **Artisan commands** for key generation, chain verification, and health checks
-- ✅ **Configurable hash algorithms** (SHA-256, SHA-512, etc.)
-- ✅ **Support for custom cryptographic keys** and password-protected private keys
-- ✅ **User-specific certificates** for multi-user applications and enhanced security
-- ✅ **Merkle root verification** for additional integrity and hierarchical signing
-- ✅ **Health check command** for comprehensive system monitoring
-- ✅ **Fork detection** to prevent and identify chain manipulations
-- ✅ **Comprehensive verification** (individual blocks, entire chains, data integrity)
-- ✅ **Automatic chain verification** on block creation (configurable)
-- ✅ **Multiple key management** (default certificates and user-specific certificates)
-- ✅ **Exception handling** with custom BlockchainException for robust error management
-- ✅ **Model relationships** for certificates and ledgers
+Let's be real: traditional databases are great, but they don't keep a reliable history of changes, and anyone with access can modify records without leaving a trace. Laravel Blockchain solves this by:
+
+- **Creating an unbreakable chain of records** – Each entry cryptographically links to the previous one, making tampering practically impossible
+- **Proving data authenticity** – Digital signatures ensure records haven't been altered since creation
+- **Building a complete audit trail** – Perfect for compliance, financial records, or any data you can't afford to lose trust in
+- **Detecting forks and manipulations** – The system automatically spots if someone tries to rewrite history
+
+**Real-world use cases:**
+- Financial transactions and invoices
+- Medical records and patient histories
+- Legal documents and contracts
+- Inventory and supply chain tracking
+- Voting systems and election results
+- Certificate issuance and verification
+- Any data where integrity matters more than convenience
 
 ---
 
-## 📦 Installation
+## Getting Started (The Easy Way)
 
-Install the package via Composer:
+### Step 1: Install the Package
 
 ```bash
 composer require ronald-ph/laravel-blockchain
 ```
 
-Publish the configuration file:
+### Step 2: Publish Configuration and Migrations
 
 ```bash
+# Publish the config file
 php artisan vendor:publish --tag=blockchain-config
-```
 
-Publish and run the migrations:
-
-```bash
+# Publish and run migrations
 php artisan vendor:publish --tag=blockchain-migrations
 php artisan migrate
 ```
 
-Generate cryptographic keys for signing blocks:
+This creates a `blockchain_ledgers` table that will store your immutable records.
+
+### Step 3: Generate Your Security Keys
+
+Think of these like the master keys to your blockchain. You'll need them to sign and verify blocks.
 
 ```bash
-php artisan blockchain:generate-keys --password=yourpassword
+php artisan blockchain:generate-keys --password=your-secure-password
 ```
 
-Set the private key password in your `.env` file:
+Then add the password to your `.env` file:
 
 ```env
-BLOCKCHAIN_PRIVATE_KEY_PASSWORD=yourpassword
+BLOCKCHAIN_PRIVATE_KEY_PASSWORD=your-secure-password
 ```
 
-### ⚡ Upgrade from v1.2.1 to v2.0.0
+**That's it!** You're ready to start creating tamper-proof records.
 
-This release introduces user-specific certificates, health checks, and enhanced chain verification.
+---
 
-Update the package:
+## Your First Blockchain Record (In 5 Lines)
 
-```bash
-composer update ronald-ph/laravel-blockchain
-```
-
-Republish config and migrations if needed:
-
-```bash
-php artisan vendor:publish --tag=blockchain-config --force
-php artisan vendor:publish --tag=blockchain-migrations --force
-php artisan migrate
-```
-
-Regenerate keys if necessary and set the password in `.env`.
-
-## ⚙️ Configuration
-
-The configuration file is located at `config/blockchain.php`. Key settings include:
-
-```php
-return [
-    'table_name' => 'blockchain_ledgers', // Main ledger table name
-    'hash_algorithm' => 'sha256', // Hash algorithm for block hashing
-    'keys_path' => storage_path('blockchain/keys'), // Path to store keys
-    'private_key' => 'private.pem', // Default private key file
-    'public_key' => 'public.pem', // Default public key file
-    'private_key_password' => env('BLOCKCHAIN_PRIVATE_KEY_PASSWORD'), // Password for private key
-    'genesis_hash' => '00000', // Genesis block hash
-    'auto_verify' => false, // Auto-verify chain on block creation
-    'with_blockchain_root' => false, // Enable Merkle root verification
-    'master_private_key' => 'master_private.pem', // Master private key for Merkle roots
-    'master_public_key' => 'master_public.pem', // Master public key for Merkle roots
-    'master_private_key_password' => env('BLOCKCHAIN_MASTER_PRIVATE_KEY_PASSWORD'), // Master key password
-];
-```
-
-To enable Merkle root verification, set `'with_blockchain_root' => true` and generate master keys:
-
-```bash
-openssl genrsa -out master_private.pem 4096
-openssl rsa -in master_private.pem -pubout -out master_public.pem
-```
-
-## Usage
-
-### 🧩 Basic Usage
+Let's say you want to create a tamper-proof record whenever a user is created:
 
 ```php
 use RonaldPH\LaravelBlockchain\Facades\Blockchain;
 
-// Create a user
+// Create a user (the normal way)
 $user = User::create([
-    'name' => 'Juan Dela Cruz',
-    'email' => 'juan@example.com',
+    'name' => 'Jane Doe',
+    'email' => 'jane@example.com',
 ]);
 
-// Create blockchain record
+// Lock it into the blockchain (the secure way)
 $block = Blockchain::createBlock(
-    'users',                                      // table name
-    $user->id,                                    // record ID
-    $user->only('id', 'name', 'email')           // data to hash
+    'users',                                    // Which table
+    $user->id,                                  // Which record
+    $user->only('id', 'name', 'email')         // What data to protect
 );
 ```
 
-### 📤 Using with Request (File Upload)
+Done! That user record is now part of an immutable chain. If anyone tries to modify it later, you'll know.
 
-```php
-use Illuminate\Http\Request;
-use RonaldPH\LaravelBlockchain\Facades\Blockchain;
+---
 
-public function store(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'private_key' => 'file', // Optional for user-specific certificates
-        'private_key_password' => 'string', // Optional for user-specific certificates
-    ]);
+## How Does It Actually Work?
 
-    $user = User::create([
-        'email' => $request->email,
-    ]);
+Don't worry, you don't need to understand blockchain to use this. But here's the simple version:
 
-    // Create block with optional user-specific private key
-    $block = Blockchain::createBlock(
-        'users',
-        $user->id,
-        json_encode($user->only('id', 'email', 'created_at')),
-        Auth::user()->id, // Optional: user ID
-        $request->file('private_key'), // Optional: user-specific key
-        $request->private_key_password // Optional: password
-    );
+1. **You create a record** → The package hashes your data
+2. **It links to the previous record** → Creating a chain
+3. **It signs everything with cryptography** → Making it tamper-proof
+4. **You can verify at any time** → To check if anything's been changed
 
-    return response()->json(['user' => $user, 'block' => $block]);
-}
-```
+Think of it like a notary stamp that can't be forged, and each stamp references the one before it.
 
-### 🔄 Update & Chain Blocks
+---
 
-```php
-// Update user
-$user->update(['email' => 'juan@example.com']);
+## Checking If Your Data Has Been Tampered With
 
-// Create new blockchain block for the update
-$block = Blockchain::createBlock(
-    'users',
-    $user->id,
-    $user->only('id', 'email', 'updated_at')
-);
-```
-
-## 🔍 Verification
-
-### Verify a Block
+### Verify a Single Block
 
 ```php
 $result = Blockchain::verifyBlock($blockHash);
 
 if ($result['valid']) {
-    echo "Block is valid!";
+    echo "✓ This record is authentic and untampered";
 } else {
-    echo "Block verification failed: " . $result['message'];
+    echo "⚠️ Warning: This record may have been modified!";
+    echo "Reason: " . $result['message'];
 }
 ```
 
-### Verify Entire Chain
+### Verify an Entire Chain for a Record
 
 ```php
 $result = Blockchain::verifyChain('users', $userId);
 
 if ($result['valid']) {
-    echo "Chain is valid! Total blocks: " . $result['total_blocks'];
+    echo "✓ All {$result['total_blocks']} records in this chain are valid";
 } else {
-    echo "Chain verification failed!";
+    echo "⚠️ Chain integrity compromised!";
     print_r($result['invalid_blocks']);
 }
 ```
 
-### Verify Data Integrity
+### Check If Current Data Matches the Blockchain
 
 ```php
 $user = User::find($userId);
@@ -220,13 +148,17 @@ $result = Blockchain::verifyData(
 );
 
 if ($result['valid']) {
-    echo "Data has not been tampered with!";
+    echo "✓ Database matches blockchain – all good!";
 } else {
-    echo "Data tampering detected!";
+    echo "⚠️ Data mismatch detected! Someone may have modified the database directly.";
 }
 ```
 
-### Get Blockchain History
+---
+
+## Viewing History (Your Audit Trail)
+
+Want to see every change ever made to a record?
 
 ```php
 $history = Blockchain::getHistory('users', $userId);
@@ -234,31 +166,92 @@ $history = Blockchain::getHistory('users', $userId);
 foreach ($history as $block) {
     echo "Block #{$block->id} - {$block->created_at}\n";
     echo "Hash: {$block->block_hash}\n";
+    echo "Previous: {$block->previous_hash}\n";
+    echo "---\n";
 }
 ```
 
-### 🔐 Using Custom Keys
+This gives you a complete, verifiable history of all changes.
+
+---
+
+## Advanced Features (When You Need More Control)
+
+### User-Specific Certificates (Multi-User Apps)
+
+If you're building a multi-user system where each user needs their own cryptographic identity:
 
 ```php
-// Set custom private and public keys for a specific operation
-$block = Blockchain::setPrivateKey('/path/to/private.pem', 'password')
-    ->setPublicKey('/path/to/public.pem')
-    ->createBlock('users', $userId, $data);
+public function store(Request $request)
+{
+    $user = User::create(['email' => $request->email]);
 
-// Verify with custom public key
-$result = Blockchain::setPublicKey('/path/to/public.pem')
-    ->verifyBlock($blockHash);
+    // Create a block signed with the user's own private key
+    $block = Blockchain::createBlock(
+        'users',
+        $user->id,
+        $user->only('id', 'email'),
+        Auth::id(),                              // Who's creating this
+        $request->file('private_key'),           // User's private key
+        $request->input('private_key_password')  // Key password
+    );
+
+    return response()->json(['user' => $user, 'block' => $block]);
+}
 ```
 
-## 🧰 Artisan Commands
+### Using Custom Keys
 
-### Generate Keys
+```php
+// Use a different set of keys for specific operations
+$block = Blockchain::setPrivateKey('/path/to/custom-private.pem', 'password')
+    ->setPublicKey('/path/to/custom-public.pem')
+    ->createBlock('orders', $orderId, $orderData);
+```
+
+### Automatic Blockchain on Model Changes
+
+Want to automatically create blockchain records when your models change? Add this to your model:
+
+```php
+class Order extends Model
+{
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($order) {
+            Blockchain::createBlock(
+                'orders',
+                $order->id,
+                $order->only('id', 'total', 'status', 'created_at')
+            );
+        });
+
+        static::updated(function ($order) {
+            Blockchain::createBlock(
+                'orders',
+                $order->id,
+                $order->only('id', 'total', 'status', 'updated_at')
+            );
+        });
+    }
+}
+```
+
+Now every order creation and update is automatically recorded in the blockchain. Set it and forget it!
+
+---
+
+## Artisan Commands (Your Blockchain Toolkit)
+
+### Generate New Keys
 
 ```bash
 php artisan blockchain:generate-keys --password=yourpassword --bits=4096
 ```
 
-### Verify Chain
+### Verify a Chain from the Command Line
 
 ```bash
 php artisan blockchain:verify users 1
@@ -270,89 +263,62 @@ Output:
 Total blocks verified: 5
 ```
 
-### Health Check
+### Health Check (Is Everything Working?)
 
-Run comprehensive system health checks:
+Run this regularly to make sure your blockchain system is healthy:
 
 ```bash
 php artisan blockchain:health
 ```
 
-Output:
-```
-🔍 Blockchain Health Check
-═══════════════════════════════════════════════════
+You'll get a comprehensive report covering:
+- ✅ Environment checks (PHP, OpenSSL, extensions)
+- 🔑 Key validation (do your keys exist and work?)
+- 💾 Database health (connection, schema, indexes)
+- 📊 Activity metrics (blocks created, verifications run)
+- 🔍 Chain integrity (sample verification, orphaned blocks)
+- 💿 Disk space monitoring
 
-+----------------+-----------------------------+--------+--------------------------------+
-| Category       | Check                       | Status | Details                        |
-+----------------+-----------------------------+--------+--------------------------------+
-| Environment    | PHP Version                 | ✓      | 8.2.0                          |
-| Environment    | OpenSSL Extension           | ✓      | OK                             |
-| Environment    | JSON Extension              | ✓      | OK                             |
-| Environment    | App Environment             | ✓      | local                          |
-| Keys           | Keys Directory Exists       | ✓      | /path/to/storage/blockchain    |
-| Keys           | Private Key Exists          | ✓      | ✓                              |
-| Keys           | Private Key Readable        | ✓      | ✓                              |
-| Keys           | Private Key Format          | ✓      | Valid PEM                      |
-| Keys           | Private Key Size            | ✓      | 1.8 KB                         |
-| Keys           | Public Key Exists           | ✓      | ✓                              |
-| Keys           | Public Key Readable         | ✓      | ✓                              |
-| Keys           | Public Key Format           | ✓      | Valid PEM                      |
-| Keys           | Private Key Password Set    | ✓      | Configured                     |
-| Database       | Connection                  | ✓      | Connected                      |
-| Database       | Database Name               | ✓      | laravel                        |
-| Database       | Table Exists                | ✓      | blockchain_ledgers             |
-| Database       | Table Schema                | ✓      | Valid                          |
-| Database       | Indexes                     | ✓      | 4 indexes                      |
-| Database       | Total Blocks                | ✓      | 1,234                          |
-| Database       | Table Size                  | ✓      | 15.67 MB                       |
-| Permissions    | Keys Directory              | ✓      | Writable (Perms: 0755)         |
-| Permissions    | Logs Directory              | ✓      | Writable                       |
-| Permissions    | Storage Directory           | ✓      | Writable                       |
-| Configuration  | Hash Algorithm              | ✓      | sha256                         |
-| Configuration  | Genesis Hash                | ✓      | 00000                          |
-| Configuration  | Auto Verify                 | ✓      | Disabled                       |
-| Configuration  | Keys Path                   | ✓      | /path/to/storage/blockchain    |
-| Configuration  | Production Security         | ✓      | N/A (not production)           |
-| Activity       | Last 24 Hours               | ✓      | 45 blocks                      |
-| Activity       | Last 7 Days                 | ✓      | 312 blocks                     |
-| Activity       | Last 30 Days                | ✓      | 1,156 blocks                   |
-| Activity       | Latest Block                | ✓      | 2 hours ago                    |
-| Activity       | Latest Block Hash           | ✓      | a1b2c3d4...                    |
-| Activity       | Tables Tracked              | ✓      | 8                              |
-| Chain Integrity| Sample Verification         | ✓      | 5/5 valid chains               |
-| Chain Integrity| Orphaned Blocks             | ✓      | 0 blocks                       |
-| Metrics        | Blocks Created              | ✓      | 1,234                          |
-| Metrics        | Block Creation Failures     | ✓      | 0                              |
-| Metrics        | Successful Verifications    | ✓      | 987                            |
-| Metrics        | Invalid Signatures          | ✓      | 0                              |
-| Metrics        | Hash Mismatch               | ✓      | 0                              |
-| Metrics        | Chain Breaks                | ✓      | 0                              |
-| Metrics        | Data Tampering Detected     | ✓      | 0                              |
-| Disk Space     | Free Space                  | ✓      | 45.2 GB                        |
-| Disk Space     | Total Space                 | ✓      | 100 GB                         |
-| Disk Space     | Used                        | ✓      | 54.8%                          |
-+----------------+-----------------------------+--------+--------------------------------+
-
-═══════════════════════════════════════════════════
-Summary: 45/45 checks passed
-🎉 All checks passed! System is healthy.
-```
-
-Options:
+For machine-readable output (great for monitoring systems):
 ```bash
-# Detailed output
-php artisan blockchain:health --detailed
-
-# JSON output for monitoring systems
 php artisan blockchain:health --json
 ```
 
-## 🧠 Advanced Usage
+---
 
-### 🔸 Model Trait (Optional)
+## Configuration Options
 
-Create a trait to easily add blockchain to your models:
+Open `config/blockchain.php` to customize behavior:
+
+```php
+return [
+    // The table where blockchain records are stored
+    'table_name' => 'blockchain_ledgers',
+    
+    // Hash algorithm (sha256, sha512, etc.)
+    'hash_algorithm' => 'sha256',
+    
+    // Where your keys are stored
+    'keys_path' => storage_path('blockchain/keys'),
+    
+    // Auto-verify the chain after creating each block?
+    // Slightly slower, but catches issues immediately
+    'auto_verify' => false,
+    
+    // Enable Merkle root verification for hierarchical signing
+    // Provides an extra layer of security
+    'with_blockchain_root' => false,
+    
+    // Genesis hash (the starting point of all chains)
+    'genesis_hash' => '00000',
+];
+```
+
+---
+
+## Making It Even Easier (Optional Trait)
+
+Add this trait to your models for cleaner code:
 
 ```php
 namespace App\Traits;
@@ -364,12 +330,7 @@ trait HasBlockchain
     public function createBlockchainRecord($data = null)
     {
         $data = $data ?? $this->toArray();
-
-        return Blockchain::createBlock(
-            $this->getTable(),
-            $this->id,
-            $data
-        );
+        return Blockchain::createBlock($this->getTable(), $this->id, $data);
     }
 
     public function getBlockchainHistory()
@@ -384,126 +345,115 @@ trait HasBlockchain
 }
 ```
 
-Use in your model:
+Now your models can do this:
 
 ```php
-class User extends Model
+class Invoice extends Model
 {
     use HasBlockchain;
 }
 
-// Usage
-$user->createBlockchainRecord();
-$history = $user->getBlockchainHistory();
-$result = $user->verifyBlockchain();
+// Usage is super clean
+$invoice->createBlockchainRecord();
+$history = $invoice->getBlockchainHistory();
+$result = $invoice->verifyBlockchain();
 ```
 
-### 🔸 Model Events (Auto-create blocks)
+---
 
-```php
-class User extends Model
-{
-    protected static function boot()
-    {
-        parent::boot();
+## Security Best Practices (Please Read This!)
 
-        static::created(function ($user) {
-            Blockchain::createBlock(
-                'users',
-                $user->id,
-                $user->only('id', 'email', 'created_at')
-            );
-        });
+This package provides strong cryptographic security, but you need to use it correctly:
 
-        static::updated(function ($user) {
-            Blockchain::createBlock(
-                'users',
-                $user->id,
-                $user->only('id', 'email', 'updated_at')
-            );
-        });
-    }
-}
+🔐 **NEVER commit your private keys to Git** – Add `storage/blockchain/keys/*` to your `.gitignore`
+
+🔒 **Restrict key file permissions** – Run `chmod 700 storage/blockchain/keys` on your server
+
+💪 **Use strong passwords** – Your private key password is the last line of defense
+
+💾 **Back up your keys** – If you lose them, you lose the ability to verify your blockchain
+
+🔍 **Run health checks regularly** – `php artisan blockchain:health` should be part of your monitoring
+
+👥 **Use user-specific certificates** – In multi-user apps, give each user their own keys
+
+📊 **Monitor for suspicious activity** – Set up alerts if verification failures occur
+
+🔄 **Rotate keys periodically** – For high-security applications, establish a key rotation schedule
+
+---
+
+## Upgrading from v1.2.1 to v2.0.0
+
+Version 2.0 adds some great new features:
+
+```bash
+# Update the package
+composer update ronald-ph/laravel-blockchain
+
+# Republish config and migrations
+php artisan vendor:publish --tag=blockchain-config --force
+php artisan vendor:publish --tag=blockchain-migrations --force
+php artisan migrate
 ```
 
-### 🔸 Certificate Management
+New in v2.0:
+- 🎫 User-specific certificates for multi-user security
+- 🏥 Comprehensive health check command
+- 🔍 Enhanced chain verification and fork detection
+- 📊 Better metrics and monitoring
 
-#### Default Certificate Management
+---
 
-```php
-// Update default certificate for the application
-$certificate = Blockchain::updateDefaultCertificate(
-    file_get_contents('/path/to/private.pem'),
-    file_get_contents('/path/to/public.pem')
-);
-```
+## Understanding the Tech (For the Curious)
 
-#### User-Specific Certificates
+You don't need to know this to use the package, but here's what happens under the hood:
 
-```php
-// Update user-specific certificate for multi-user security
-$certificate = Blockchain::updateModelCertificate(
-    $userId,
-    file_get_contents('/path/to/private.pem'),
-    file_get_contents('/path/to/public.pem')
-);
+**When you create a block:**
+1. Your data gets hashed (turned into a unique fingerprint)
+2. That hash gets combined with the previous block's hash (creating the chain)
+3. Everything gets signed with your private key (proof of authenticity)
+4. The block gets stored with all this cryptographic proof
 
-// Retrieve a user's certificate
-$userCertificate = Blockchain::getModelCertificate($userId);
-```
+**When you verify:**
+1. The system recalculates the hash from the stored data
+2. It checks if the hash matches what was originally recorded
+3. It verifies the digital signature using your public key
+4. It checks that each block properly links to the one before it
 
-## ⚙️ How It Works
+If any of this fails, you know something's been tampered with!
 
-1. **Block Creation**: When you create a block, the package:
-   - Hashes your data using the configured algorithm (e.g., SHA-256)
-   - Chains it to the previous block's hash (or genesis hash for the first block)
-   - Creates a unique block hash combining data, previous hash, and timestamp
-   - Signs the block with RSA private key (default or user-specific)
-   - Optionally signs with master key for Merkle root verification
-   - Stores the block, signature, and metadata in the blockchain_ledgers table
+---
 
-2. **Verification**: When verifying:
-   - Recalculates the block hash to ensure data integrity
-   - Verifies the RSA digital signature using the corresponding public key
-   - Checks chain continuity by validating previous hash links
-   - Detects forks, tampering, or broken chains
-   - For Merkle root enabled: Verifies hierarchical signatures
-
-3. **Data Integrity**: The blockchain ensures:
-   - Immutable records with cryptographic tamper detection
-   - Complete chronological audit trail of all changes
-   - Cryptographic proof of authenticity and non-repudiation
-   - Tamper-evident history with fork detection capabilities
-   - Support for both default and user-specific certificate management
-
-## 🛡️ Security Recommendations
-
-- 🔐 **Never commit private keys to version control** - Use .gitignore for key files
-- 🧱 **Store keys securely** in `storage/blockchain/keys` with restricted permissions (e.g., 0700)
-- 💪 **Use strong passwords** for private keys and rotate them periodically
-- 💾 **Regularly back up** both cryptographic keys and blockchain ledger data
-- 🔍 **Run health checks** (`php artisan blockchain:health`) regularly to monitor system integrity
-- 🏛️ **Enable Merkle root verification** for hierarchical signing and enhanced security
-- 👤 **Use user-specific certificates** in multi-user applications for isolated security
-- 🔒 **Enable auto-verification** in config for real-time chain integrity checks
-- 🚨 **Monitor for forks** using the verification commands to detect tampering attempts
-- 📊 **Log and audit** all blockchain operations for compliance and security monitoring
-
-## 🧪 Testing
+## Testing
 
 ```bash
 composer test
 ```
 
-## 📜 License
+---
 
-This package is open-sourced software licensed under the [MIT License](https://github.com/Ronald-PH/laravel-blockchain/?tab=MIT-1-ov-file)
+## Contributing & Support
 
-## 💡 Credits
+Found a bug? Have a feature request? Want to contribute?
 
-Developed by **Ronald PH**<br>
-📦 [GitHub Repository](https://github.com/ronald-ph/laravel-blockchain)
+📦 [GitHub Repository](https://github.com/ronald-ph/laravel-blockchain)  
+🐛 [Issue Tracker](https://github.com/ronald-ph/laravel-blockchain/issues)
 
-## Support
+---
 
-For issues and questions, please use the [GitHub issue tracker](https://github.com/ronald-ph/laravel-blockchain/issues).
+## License
+
+Open-source and free to use under the [MIT License](https://github.com/Ronald-PH/laravel-blockchain/?tab=MIT-1-ov-file).
+
+---
+
+## Credits
+
+Built with ☕ by **Ronald PH**
+
+If this package saves you time or makes your app more secure, consider giving it a ⭐ on GitHub!
+
+---
+
+**Questions?** Don't hesitate to open an issue. We're here to help make your data more secure.
