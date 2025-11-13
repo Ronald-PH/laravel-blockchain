@@ -3,11 +3,16 @@
     "description": "A Laravel package for implementing blockchain ledger functionality with digital signatures.",
     "type": "library",
     "keywords": [
-        "laravel",
-        "blockchain",
-        "ledger",
+        "laravel-package",
         "digital-signature",
-        "audit-trail"
+        "immutable-database",
+        "data-integrity",
+        "audit-trail",
+        "blockchain-ledger",
+        "tamper-proof",
+        "laravel-security",
+        "laravel-blockchain",
+        "merkle-verification"
     ],
     "license": "MIT",
     "authors": [
