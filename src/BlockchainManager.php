@@ -168,14 +168,15 @@ class BlockchainManager
      */
     public function createBlock(string $tableName, int $recordId, $data, ?int $user_id = null, $privateKey = null, ?string $password = null)
     {
+
         $timestamp = $timestamp ?? now()->toDateTimeString();
         if (config('blockchain.auto_verify')) {
+
             $verification = $this->verifyChain($tableName, $recordId);
             if (!$verification['valid']) {
                 return $verification;
             }
         }
-
         $blockchain = BlockchainLedger::where('table_name', $tableName)
             ->where('record_id', $recordId)
             ->orderBy('id', 'DESC')
@@ -206,7 +207,6 @@ class BlockchainManager
 
         $with_certificate = ModelHasCertificate::where('user_id', $user_id)->where('status', 1)->first();
         $default_certificate = BlockchainDefaultCertificate::where('status', 1)->first();
-
         if ($with_certificate) {
             $signature = $this->signBlock($signatureData, $privateKey, $password, $user_id);
         } else {
@@ -228,8 +228,7 @@ class BlockchainManager
             'default_certificate_id' => !$with_certificate && $default_certificate ? $default_certificate->id : null,
             'algorithm' => $hashAlgorithm,
         ]);
-
-        config('blockchain.with_blockchain_root') ? $this->updateMerkleRoot($tableName, $recordId) : '';
+        config('blockchain.with_merkle_root') ? $this->updateMerkleRoot($tableName, $recordId) : '';
 
         return $block;
     }
@@ -246,14 +245,14 @@ class BlockchainManager
      */
     public function verifyBlock(BlockchainLedger $block): bool
     {
+
         $computedHash = $block->data . $block->data_hash . $block->previous_hash . $block->block_hash . $block->algorithm;
 
         $publicKeyPath = $this->getPublicKeyPath($block);
-
         if ($block->with_user_certificate == 1) {
             $certificate = ModelHasCertificate::where('id', $block->certificate_id)->first();
-            if ($certificate && file_exists(storage_path($certificate->public_key_path)) && $block->with_user_certificate == 1) {
-                $publicKeyPath = storage_path($certificate->public_key_path);
+            if ($certificate && file_exists($certificate->public_key_path) && $block->with_user_certificate == 1) {
+                $publicKeyPath = $certificate->public_key_path;
             }
         }
 
@@ -297,12 +296,15 @@ class BlockchainManager
             ];
         }
 
-        $verify_root = $this->verifyMerkleRoot($tableName, $recordId);
-        if (!$verify_root) {
-            return [
-                'valid' => false,
-                'message' => 'Blockchain tampering detected: Merkle root verification failed. One or more blocks may have been altered.',
-            ];
+        if(config('blockchain.with_merkle_root')) {
+            $merkle_root = BlockchainRoot::where('table_name', $tableName)->where('record_id', $recordId)->first();
+            $verify_root = $this->verifyMerkleRoot($tableName, $recordId);
+            if (!$verify_root) {
+                return [
+                    'valid' => false,
+                    'message' => 'Blockchain tampering detected: Merkle root verification failed. One or more blocks may have been altered.',
+                ];
+            }
         }
 
         $invalidBlocks = [];
@@ -459,7 +461,7 @@ class BlockchainManager
 
         $merkleRoot = $this->computeMerkleRoot($blocks);
 
-        $masterPrivateKey = file_get_contents(storage_path(config('blockchain.master_private_key')));
+        $masterPrivateKey = file_get_contents(config('blockchain.master_private_key'));
         $password = config('blockchain.master_private_key_password');
         openssl_sign($merkleRoot, $signature, openssl_pkey_get_private($masterPrivateKey, $password), OPENSSL_ALGO_SHA256);
 
@@ -484,7 +486,28 @@ class BlockchainManager
             ->where('record_id', $recordId)
             ->first();
 
-        if (!$root) return false;
+        if (!$root) {
+            $blocks = BlockchainLedger::where('table_name', $tableName)
+                ->where('record_id', $recordId)
+                ->orderBy('id', 'ASC')
+                ->pluck('block_hash')
+                ->toArray();
+
+            if (empty($blocks)) return false;
+
+            $merkleRoot = $this->computeMerkleRoot($blocks);
+
+            $masterPrivateKey = file_get_contents(config('blockchain.master_private_key'));
+            $password = config('blockchain.master_private_key_password');
+            openssl_sign($merkleRoot, $signature, openssl_pkey_get_private($masterPrivateKey, $password), OPENSSL_ALGO_SHA256);
+
+            $root = BlockchainRoot::create([
+                'table_name' => $tableName,
+                'record_id' => $recordId,
+                'merkle_root' => $merkleRoot,
+                'signature' => base64_encode($signature)
+            ]);
+        };
 
         $blocks = BlockchainLedger::where('table_name', $tableName)
             ->where('record_id', $recordId)
@@ -493,7 +516,7 @@ class BlockchainManager
             ->toArray();
 
         $computedRoot = $this->computeMerkleRoot($blocks);
-        $masterPublicKey = file_get_contents(storage_path(config('blockchain.master_public_key')));
+        $masterPublicKey = file_get_contents(config('blockchain.master_public_key'));
 
         $verified = openssl_verify(
             $computedRoot,

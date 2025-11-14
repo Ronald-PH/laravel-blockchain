@@ -111,13 +111,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Blockchain Root Configuration
+    | Merkle Root Configuration
     |--------------------------------------------------------------------------
     |
     | Enable Merkle root signing with a master key pair.
     |
     */
-    'with_blockchain_root' => env('WITH_BLOCKCHAIN_ROOT', false),
+    'with_merkle_root' => env('WITH_MERKLE_ROOT', false),
     'master_private_key' => env('MASTER_PRIVATE_KEY', null),
     'master_private_key_password' => env('MASTER_PRIVATE_KEY_PASSWORD', null),
     'master_public_key' => env('MASTER_PUBLIC_KEY', null),
